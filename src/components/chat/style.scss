@@ -1,0 +1,115 @@
+@import "src/styles";
+
+.chat {
+  flex: 2;
+  border-left: 1px solid rgba($white, 0.1);
+  border-right: 1px solid rgba($white, 0.1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .top {
+    padding: 1.125rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba($white, 0.1);
+
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 1.125rem;
+
+      img {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .texts {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        span {
+          font-size: 1.125rem;
+          font-weight: bold;
+        }
+
+        p {
+          font-size: 0.75rem;
+          font-weight: 300;
+          color: rgba($white, 0.5);
+        }
+      }
+    }
+
+    .icons {
+      display: flex;
+      gap: 1.125rem;
+
+      img {
+        width: 1.125rem;
+        height: 1.125rem;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .center {
+    padding: 1.125rem;
+    flex: 1;
+  }
+
+  .bottom {
+    padding: 1.125rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba($white, 0.1);
+    gap: 1.125rem;
+    margin-top: auto;
+
+    .icons {
+      display: flex;
+      gap: 1.125rem;
+    }
+
+    img {
+      width: 1.125rem;
+      height: 1.125rem;
+      cursor: pointer;
+    }
+
+    .input {
+      flex: 1;
+      background-color: rgba($primary-color, 0.5);
+      border: none;
+      outline: none;
+      color: $white;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+    }
+
+    .emoji {
+      position: relative;
+
+      .emoji-picker {
+        position: absolute;
+        bottom: 3rem;
+        left: 0;
+      }
+    }
+
+    .send-btn {
+      background-color: $primary-color;
+      color: $white;
+      padding: 0.5rem 1.125rem;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+  }
+}
