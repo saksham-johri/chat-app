@@ -8,7 +8,9 @@
 }
 
 body {
+  font-family: "Poppins", sans-serif;
   background-image: url("/assets/background.png");
+  backdrop-filter: blur(0.5rem) saturate(150%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -17,11 +19,8 @@ body {
 }
 
 .mainContainer {
-  height: 90dvh;
-  width: 90dvw;
-  background-color: $background-color;
-  backdrop-filter: blur(1.125rem) saturate(180%);
-  border-radius: 0.25rem;
-  border: 1px solid rgba($white, 0.125);
+  height: 80dvh;
+  width: 80dvw;
   display: flex;
+  gap: 0.5rem;
 }

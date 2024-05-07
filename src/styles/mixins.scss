@@ -18,3 +18,23 @@ $desktop-width: 1024px;
     @content;
   }
 }
+
+@mixin ellipse {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin input {
+  background-color: $input-background-color;
+  color: $white;
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+@mixin section {
+  background-color: $background-color;
+  backdrop-filter: blur(1.125rem) saturate(180%);
+  border-radius: 0.5rem;
+}
