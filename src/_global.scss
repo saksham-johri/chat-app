@@ -1,0 +1,41 @@
+@import "src/styles";
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background-image: url("/assets/background.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  backdrop-filter: blur(0.5rem) saturate(150%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100dvh;
+  color: $white;
+}
+
+.mainContainer {
+  height: 80dvh;
+  width: 80dvw;
+  display: flex;
+  gap: 0.5rem;
+}
+
+// no scroll bar
+::-webkit-scrollbar {
+  display: none;
+}
+
+::-webkit-scrollbar-thumb {
+  display: none;
+}
+
+::-webkit-scrollbar-track {
+  display: none;
+}

@@ -53,6 +53,7 @@
   flex-direction: column;
   gap: 0.5rem;
   overflow: hidden;
+  height: 100%;
 
   .search {
     display: flex;
@@ -93,8 +94,9 @@
   }
 
   .item-container {
-    overflow: scroll;
     @include section;
+    overflow: scroll;
+    height: 100%;
 
     .item {
       display: flex;

@@ -1,3 +1,4 @@
+import "./_global.scss";
 import Chat from "./components/Chat";
 import Detail from "./components/Detail";
 import List from "./components/List";
