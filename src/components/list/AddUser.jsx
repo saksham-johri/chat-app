@@ -1,8 +1,37 @@
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { addNewChat, findUsers } from "src/apis/firestore";
 import "./style.scss";
 
-const AddUser = () => {
-  const onSubmit = (event) => {
+const AddUser = ({ toggleAddMore = () => {} }) => {
+  const currentUser = useSelector((state) => state?.currentUser);
+
+  const [users, setUsers] = useState([]);
+
+  const onSubmit = async (event) => {
     event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const name = formData.get("name");
+
+    try {
+      const userList = await findUsers(name);
+      setUsers(userList);
+    } catch (error) {
+      toast.error(error?.message || "Something went wrong");
+    }
+  };
+
+  const handleAddUser = ({ uid }) => {
+    addNewChat({ currentUserUid: currentUser?.uid, uid })
+      .then(() => {
+        toast.success("User added successfully");
+        toggleAddMore();
+      })
+      .catch((error) => {
+        toast.error(error?.message || "Something went wrong");
+      });
   };
 
   return (
@@ -10,8 +39,8 @@ const AddUser = () => {
       <form className="form" onSubmit={onSubmit}>
         <input
           type="text"
-          name="username"
-          placeholder="Username"
+          name="name"
+          placeholder="Type Here..."
           className="input"
         />
 
@@ -21,14 +50,22 @@ const AddUser = () => {
       </form>
 
       <div className="user-container">
-        <div className="user">
-          <div className="user-detail">
-            <img src="./assets/avatar.png" alt="" className="user-image" />
-            <span className="user-name">Username</span>
-          </div>
+        {users?.map(({ uid, displayName, photoURL }) => (
+          <div key={uid} className="user">
+            <div className="user-detail">
+              <img
+                src={photoURL ? photoURL : "./assets/avatar.png"}
+                alt=""
+                className="user-image"
+              />
+              <span className="user-name">{displayName}</span>
+            </div>
 
-          <button className="add">Add User</button>
-        </div>
+            <button className="add" onClick={() => handleAddUser({ uid })}>
+              Add User
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
