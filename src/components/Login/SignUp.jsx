@@ -59,6 +59,7 @@ const SignUp = ({ toggleView = () => {} }) => {
         <input
           className="input"
           type="file"
+          accept="image/*"
           id="file"
           style={{ display: "none" }}
           onChange={handleAvatar}
