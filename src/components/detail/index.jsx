@@ -1,6 +1,11 @@
+import { auth } from "src/firebase";
 import "./style.scss";
 
 const Detail = () => {
+  const logout = () => {
+    auth.signOut();
+  };
+
   return (
     <div className="detail">
       <div className="user">
@@ -64,7 +69,9 @@ const Detail = () => {
 
       <div className="footer">
         <button className="block">Block User</button>
-        <button className="logout">Logout</button>
+        <button className="logout" onClick={logout}>
+          Logout
+        </button>
       </div>
     </div>
   );

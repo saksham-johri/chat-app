@@ -3,12 +3,12 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { auth, firestoreDb, storage } from "src/firebase";
+import { auth } from "src/firebase";
+import { setUserInitialData } from "./firestore";
+import { uploadAvatar } from "./storage";
 
 export const signup = async (data) => {
-  const { username, email, password, avatar } = data;
+  const { displayName, email, password, avatar } = data;
 
   try {
     const { user } = await createUserWithEmailAndPassword(
@@ -17,21 +17,18 @@ export const signup = async (data) => {
       password
     );
 
-    const storageRef = ref(storage, `avatars/${user?.uid}`);
-    await uploadBytes(storageRef, avatar);
-    const avatarUrl = await getDownloadURL(storageRef);
+    const photoURL = await uploadAvatar({ uid: user?.uid, avatar });
 
     updateProfile(user, {
-      displayName: username,
-      photoURL: avatarUrl,
-      test: "test",
-      blocked: [],
+      displayName: displayName,
+      photoURL,
     });
 
-    await setDoc(doc(firestoreDb, "user-information", user?.uid), {
-      id: user?.uid,
-      blocked: [],
-      chats: [],
+    await setUserInitialData({
+      uid: user?.uid,
+      email,
+      displayName,
+      photoURL,
     });
 
     return {

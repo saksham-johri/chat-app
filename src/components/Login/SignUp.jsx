@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { signup } from "src/apis/auth";
-import Loader from "../Loader";
+import { setLoader } from "src/redux";
 
 const SignUp = ({ toggleView = () => {} }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+
   const [avatar, setAvatar] = useState({
     file: null,
     url: "",
@@ -27,7 +29,7 @@ const SignUp = ({ toggleView = () => {} }) => {
 
     const data = Object.fromEntries(formData.entries());
 
-    setIsLoading(true);
+    dispatch(setLoader(true));
     signup(data)
       .then((response) => {
         toast.success(response?.message);
@@ -36,69 +38,65 @@ const SignUp = ({ toggleView = () => {} }) => {
         toast.error(error?.message);
       })
       .finally(() => {
-        setIsLoading(false);
+        dispatch(setLoader(false));
       });
   };
 
   return (
-    <>
-      <div className="sign-up">
-        <h2 className="heading">Create an Account</h2>
+    <div className="sign-up">
+      <h2 className="heading">Create an Account</h2>
 
-        <form className="form" onSubmit={onCreate}>
-          <label className="label" htmlFor="file">
-            <img
-              className="avatar"
-              src={avatar?.url || "./assets/avatar.png"}
-              alt=""
-            />
-            Upload an Image
-          </label>
-
-          <input
-            className="input"
-            type="file"
-            id="file"
-            style={{ display: "none" }}
-            onChange={handleAvatar}
+      <form className="form" onSubmit={onCreate}>
+        <label className="label" htmlFor="file">
+          <img
+            className="avatar"
+            src={avatar?.url || "./assets/avatar.png"}
+            alt=""
           />
+          Upload an Image
+        </label>
 
-          <input
-            required
-            className="input"
-            type="text"
-            name="username"
-            placeholder="Username"
-          />
+        <input
+          className="input"
+          type="file"
+          id="file"
+          style={{ display: "none" }}
+          onChange={handleAvatar}
+        />
 
-          <input
-            required
-            className="input"
-            type="email"
-            name="email"
-            placeholder="Email"
-          />
+        <input
+          required
+          className="input"
+          type="text"
+          name="displayName"
+          placeholder="Display Name"
+        />
 
-          <input
-            required
-            className="input"
-            type="password"
-            name="password"
-            placeholder="Password"
-          />
+        <input
+          required
+          className="input"
+          type="email"
+          name="email"
+          placeholder="Email"
+        />
 
-          <button className="button" type="submit">
-            Sign Up
-          </button>
-        </form>
+        <input
+          required
+          className="input"
+          type="password"
+          name="password"
+          placeholder="Password"
+        />
 
-        <p className="link" onClick={toggleView}>
-          Signing In ?
-        </p>
-      </div>
+        <button className="button" type="submit">
+          Sign Up
+        </button>
+      </form>
 
-      {isLoading ? <Loader /> : null}
-    </>
+      <p className="link" onClick={toggleView}>
+        Signing In ?
+      </p>
+    </div>
   );
 };
 export default SignUp;

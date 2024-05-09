@@ -1,9 +1,20 @@
+import { useSelector } from "react-redux";
+
 const UserInfo = () => {
+  const currentUser = useSelector((state) => state.currentUser);
+  const { displayName, photoURL } = currentUser || {};
+
   return (
     <div className="user-info">
       <div className="user">
-        <img src="./assets/avatar.png" alt="" className="user-image" />
-        <h2 className="user-name">John Doe</h2>
+        <img
+          src={photoURL ? photoURL : "./assets/avatar.png"}
+          alt=""
+          className="user-image"
+        />
+        <h2 className="user-name" title={displayName}>
+          {displayName}
+        </h2>
       </div>
 
       <div className="icon-container">

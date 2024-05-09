@@ -1,18 +1,29 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import "./_global.scss";
 import Chat from "./components/Chat";
 import Detail from "./components/Detail";
 import List from "./components/List";
+import Loader from "./components/Loader";
 import Login from "./components/Login";
 import { auth } from "./firebase";
+import { updateUser } from "./redux";
 
 const App = () => {
-  const isLoggedIn = false;
+  const isLoading = useSelector((state) => state?.isLoading);
+  const currentUser = useSelector((state) => state?.currentUser);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log(">>> ~ user:", user);
+      if (!user) {
+        dispatch(updateUser(null));
+        return;
+      }
+
+      dispatch(updateUser(user?.toJSON()));
     });
 
     return () => {
@@ -22,7 +33,7 @@ const App = () => {
 
   return (
     <div className="mainContainer">
-      {isLoggedIn ? (
+      {currentUser?.uid ? (
         <>
           <List />
           <Chat />
@@ -31,6 +42,8 @@ const App = () => {
       ) : (
         <Login />
       )}
+
+      {isLoading ? <Loader /> : null}
     </div>
   );
 };
