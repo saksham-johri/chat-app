@@ -1,16 +1,37 @@
 import EmojiPicker from "emoji-picker-react";
+import { doc, onSnapshot } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { firestore } from "src/firebase";
 import "./style.scss";
 
 const Chat = () => {
+  const selectedChat = useSelector((state) => state?.selectedChat);
+
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
+  // const [messages, setMessages] = useState([]);
 
   const endRef = useRef(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
+
+  useEffect(() => {
+    if (!selectedChat?.chatId) return;
+
+    const unsubscribe = onSnapshot(
+      doc(firestore, "chats", selectedChat?.chatId),
+      (res) => {
+        console.log(">>> ~ res:", res.data());
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [selectedChat?.chatId]);
 
   const toggleEmoji = () => setIsOpen(!isOpen);
 
@@ -23,13 +44,23 @@ const Chat = () => {
     toggleEmoji();
   };
 
+  if (!selectedChat?.chatId) return null;
+
   return (
     <div className="chat">
       <div className="user-details">
         <div className="user">
-          <img src="./assets/avatar.png" alt="" className="user-image" />
+          <img
+            src={
+              selectedChat?.user?.photoURL
+                ? selectedChat?.user?.photoURL
+                : "./assets/avatar.png"
+            }
+            alt=""
+            className="user-image"
+          />
           <div className="texts">
-            <span className="name">John Doe</span>
+            <span className="name">{selectedChat?.user?.displayName}</span>
             <p className="about">Lorem ipsum dolor sit amet.</p>
           </div>
         </div>

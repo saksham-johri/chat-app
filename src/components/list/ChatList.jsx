@@ -1,11 +1,36 @@
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { firestore } from "src/firebase";
+import { setSelectedChat } from "src/redux";
 import AddUser from "./AddUser";
 
+const RenderChatItem = ({ data = {}, onClick = () => {} }) => {
+  const {
+    chatId,
+    lastMassage,
+    user: { displayName, photoURL } = {},
+  } = data || {};
+
+  return (
+    <div key={chatId} className="item" onClick={() => onClick(data)}>
+      <img
+        src={photoURL ? photoURL : "./assets/avatar.png"}
+        alt=""
+        className="item-image"
+      />
+
+      <div className="texts">
+        <span className="name">{displayName}</span>
+        <p className="message">{lastMassage}</p>
+      </div>
+    </div>
+  );
+};
+
 const ChatList = () => {
+  const dispatch = useDispatch();
   const currentUser = useSelector((state) => state?.currentUser);
 
   const [isAddMore, setIsAddMore] = useState(false);
@@ -47,6 +72,10 @@ const ChatList = () => {
 
   const toggleAddMore = () => setIsAddMore(!isAddMore);
 
+  const onChatSelect = (chatDetails) => {
+    dispatch(setSelectedChat(chatDetails));
+  };
+
   return (
     <div className="chat-list">
       <div className="search">
@@ -64,22 +93,13 @@ const ChatList = () => {
       </div>
 
       <div className="item-container">
-        {chats?.map(
-          ({ chatId, lastMassage, user: { displayName, photoURL } = {} }) => (
-            <div key={chatId} className="item">
-              <img
-                src={photoURL ? photoURL : "./assets/avatar.png"}
-                alt=""
-                className="item-image"
-              />
-
-              <div className="texts">
-                <span className="name">{displayName}</span>
-                <p className="message">{lastMassage}</p>
-              </div>
-            </div>
-          )
-        )}
+        {chats?.map((chatDetails) => (
+          <RenderChatItem
+            key={chatDetails?.chatId}
+            data={chatDetails}
+            onClick={onChatSelect}
+          />
+        ))}
       </div>
 
       {isAddMore ? <AddUser toggleAddMore={toggleAddMore} /> : null}

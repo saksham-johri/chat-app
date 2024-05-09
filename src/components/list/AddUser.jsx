@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { addNewChat, findUsers } from "src/apis/firestore";
+import { setLoader } from "src/redux";
 import "./style.scss";
 
 const AddUser = ({ toggleAddMore = () => {} }) => {
+  const dispatch = useDispatch();
+
   const currentUser = useSelector((state) => state?.currentUser);
 
   const [users, setUsers] = useState([]);
@@ -15,15 +18,28 @@ const AddUser = ({ toggleAddMore = () => {} }) => {
     const formData = new FormData(event.target);
     const name = formData.get("name");
 
+    dispatch(setLoader(true));
     try {
       const userList = await findUsers(name);
-      setUsers(userList);
+      const filteredList = userList?.filter(
+        ({ uid }) => uid !== currentUser?.uid
+      );
+
+      if (!filteredList?.length) {
+        setUsers([]);
+        return toast.error("No user found");
+      }
+
+      setUsers(filteredList);
     } catch (error) {
       toast.error(error?.message || "Something went wrong");
+    } finally {
+      dispatch(setLoader(false));
     }
   };
 
   const handleAddUser = ({ uid }) => {
+    dispatch(setLoader(true));
     addNewChat({ currentUserUid: currentUser?.uid, uid })
       .then(() => {
         toast.success("User added successfully");
@@ -31,6 +47,9 @@ const AddUser = ({ toggleAddMore = () => {} }) => {
       })
       .catch((error) => {
         toast.error(error?.message || "Something went wrong");
+      })
+      .finally(() => {
+        dispatch(setLoader(false));
       });
   };
 
@@ -49,24 +68,26 @@ const AddUser = ({ toggleAddMore = () => {} }) => {
         </button>
       </form>
 
-      <div className="user-container">
-        {users?.map(({ uid, displayName, photoURL }) => (
-          <div key={uid} className="user">
-            <div className="user-detail">
-              <img
-                src={photoURL ? photoURL : "./assets/avatar.png"}
-                alt=""
-                className="user-image"
-              />
-              <span className="user-name">{displayName}</span>
-            </div>
+      {users?.length ? (
+        <div className="user-container">
+          {users?.map(({ uid, displayName, photoURL }) => (
+            <div key={uid} className="user">
+              <div className="user-detail">
+                <img
+                  src={photoURL ? photoURL : "./assets/avatar.png"}
+                  alt=""
+                  className="user-image"
+                />
+                <span className="user-name">{displayName}</span>
+              </div>
 
-            <button className="add" onClick={() => handleAddUser({ uid })}>
-              Add User
-            </button>
-          </div>
-        ))}
-      </div>
+              <button className="add" onClick={() => handleAddUser({ uid })}>
+                Add User
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 };

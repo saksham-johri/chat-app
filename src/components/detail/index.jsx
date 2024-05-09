@@ -1,10 +1,15 @@
+import { useSelector } from "react-redux";
 import { auth } from "src/firebase";
 import "./style.scss";
 
 const Detail = () => {
+  const selectedChat = useSelector((state) => state?.selectedChat);
+
   const logout = () => {
     auth.signOut();
   };
+
+  if (!selectedChat?.chatId) return null;
 
   return (
     <div className="detail">

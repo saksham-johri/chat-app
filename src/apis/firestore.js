@@ -37,6 +37,25 @@ export const setUserInitialData = async ({
   }
 };
 
+export const getUserData = async (uid) => {
+  if (!uid) {
+    throw new Error("Invalid user id");
+  }
+
+  try {
+    const userQuery = query(
+      collection(firestore, "users"),
+      where("uid", "==", uid)
+    );
+
+    const querySnapShot = await getDocs(userQuery);
+
+    return querySnapShot.docs[0].data();
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 export const findUsers = async (name) => {
   if (!name) {
     throw new Error("Invalid name");
