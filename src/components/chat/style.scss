@@ -74,6 +74,7 @@
       max-width: 70%;
       display: flex;
       gap: 0.75rem;
+      align-self: flex-start;
 
       &.own {
         align-self: flex-end;

@@ -2,15 +2,18 @@ import EmojiPicker from "emoji-picker-react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { sendMessage } from "src/apis/firestore";
 import { firestore } from "src/firebase";
 import "./style.scss";
 
 const Chat = () => {
   const selectedChat = useSelector((state) => state?.selectedChat);
+  const { uid: currentUserUid } = useSelector((state) => state?.currentUser);
 
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
-  // const [messages, setMessages] = useState([]);
+  const [data, setData] = useState([]);
 
   const endRef = useRef(null);
 
@@ -24,7 +27,7 @@ const Chat = () => {
     const unsubscribe = onSnapshot(
       doc(firestore, "chats", selectedChat?.chatId),
       (res) => {
-        console.log(">>> ~ res:", res.data());
+        setData(res.data());
       }
     );
 
@@ -42,6 +45,23 @@ const Chat = () => {
   const onEmojiClick = ({ emoji }) => {
     setInput((input) => input + emoji);
     toggleEmoji();
+  };
+
+  const onSend = () => {
+    if (!input) return;
+
+    sendMessage({
+      chatId: selectedChat?.chatId,
+      text: input?.trim(),
+      currentUserUid: currentUserUid,
+      otherUserUid: selectedChat?.user?.uid,
+    })
+      .then(() => {
+        setInput("");
+      })
+      .catch((error) => {
+        toast.error(error.message || "Failed to send message");
+      });
   };
 
   if (!selectedChat?.chatId) return null;
@@ -73,36 +93,40 @@ const Chat = () => {
       </div>
 
       <div className="message-container">
-        {[1, 2, 3, 4, 5, 6, 7]?.map((item, index) => {
-          const ourMessage = index % 2;
-          const isImage = index % 3;
+        {data?.messages?.map(
+          ({ createdAt, text, senderId, image: imageURL }) => {
+            const ourMessage = senderId === currentUserUid;
 
-          return (
-            <div key={index} className={`messages ${ourMessage ? "own" : ""}`}>
-              {ourMessage ? null : (
-                <img className="user-img" src="./assets/avatar.png" alt="" />
-              )}
-
-              <div className="texts">
-                {isImage ? (
+            return (
+              <div
+                key={createdAt}
+                className={`messages ${ourMessage ? "own" : ""}`}
+              >
+                {ourMessage ? null : (
                   <img
-                    className="message-img"
-                    src="https://plus.unsplash.com/premium_photo-1671430149356-88062a82ae52?q=80&w=3175&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    className="user-img"
+                    src={
+                      selectedChat?.user?.photoURL
+                        ? selectedChat?.user?.photoURL
+                        : "./assets/avatar.png"
+                    }
                     alt=""
                   />
-                ) : null}
+                )}
 
-                <p className="message-text">
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                  Aliquam neque tenetur molestiae possimus libero necessitatibus
-                  ut laudantium, vero optio eum!
-                </p>
+                <div className="texts">
+                  {imageURL ? (
+                    <img className="message-img" src={imageURL} alt="" />
+                  ) : null}
 
-                <span className="last-seen">1 min ago</span>
+                  <p className="message-text">{text}</p>
+
+                  <span className="last-seen">1 min ago</span>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          }
+        )}
 
         <div ref={endRef} />
       </div>
@@ -115,11 +139,17 @@ const Chat = () => {
         </div>
 
         <input
+          autoFocus
           type="text"
           placeholder="Type a message..."
           className="input"
           value={input}
           onChange={handleOnInputChange}
+          onKeyDown={(event) => {
+            const { code } = event || {};
+
+            if (code === "Enter") onSend();
+          }}
         />
 
         <div className="emoji">
@@ -135,7 +165,9 @@ const Chat = () => {
           </div>
         </div>
 
-        <button className="send-btn">Send</button>
+        <button className="send-btn" onClick={onSend}>
+          Send
+        </button>
       </div>
     </div>
   );

@@ -2,19 +2,25 @@ import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { chatSeen } from "src/apis/firestore";
 import { firestore } from "src/firebase";
-import { setSelectedChat } from "src/redux";
+import { setLoader, setSelectedChat } from "src/redux";
 import AddUser from "./AddUser";
 
 const RenderChatItem = ({ data = {}, onClick = () => {} }) => {
   const {
     chatId,
     lastMassage,
+    isSeen,
     user: { displayName, photoURL } = {},
   } = data || {};
 
   return (
-    <div key={chatId} className="item" onClick={() => onClick(data)}>
+    <div
+      key={chatId}
+      className={`item ${!isSeen ? "not-seen" : ""}`}
+      onClick={() => onClick(data)}
+    >
       <img
         src={photoURL ? photoURL : "./assets/avatar.png"}
         alt=""
@@ -58,7 +64,9 @@ const ChatList = () => {
 
           const chatData = await Promise.all(promises);
 
-          setChats(chatData?.sort((a, b) => a?.updatedAt > b?.updatedAt));
+          setChats(
+            chatData?.sort((a, b) => a?.updatedAt - b?.updatedAt)?.reverse()
+          );
         } catch (error) {
           toast.error(error?.message || "Something went wrong");
         }
@@ -72,8 +80,19 @@ const ChatList = () => {
 
   const toggleAddMore = () => setIsAddMore(!isAddMore);
 
-  const onChatSelect = (chatDetails) => {
-    dispatch(setSelectedChat(chatDetails));
+  const onChatSelect = async (chatDetails) => {
+    dispatch(setLoader(true));
+    try {
+      await chatSeen({
+        chatId: chatDetails?.chatId,
+        currentUserUid: currentUser?.uid,
+      });
+      dispatch(setSelectedChat(chatDetails));
+    } catch (error) {
+      toast.error(error?.message || "Something went wrong");
+    } finally {
+      dispatch(setLoader(false));
+    }
   };
 
   return (

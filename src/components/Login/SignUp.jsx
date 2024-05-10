@@ -32,6 +32,7 @@ const SignUp = ({ toggleView = () => {} }) => {
     dispatch(setLoader(true));
     signup(data)
       .then((response) => {
+        toggleView();
         toast.success(response?.message);
       })
       .catch((error) => {

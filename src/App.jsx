@@ -2,6 +2,7 @@
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import "./_global.scss";
 import { getUserData } from "./apis/firestore";
 import Chat from "./components/Chat";
@@ -19,14 +20,18 @@ const App = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        dispatch(updateUser(null));
-        return;
+      try {
+        if (!user) {
+          dispatch(updateUser(null));
+          return;
+        }
+
+        const data = await getUserData(user?.uid);
+
+        dispatch(updateUser(data));
+      } catch (error) {
+        toast.error(error?.message || "Something went wrong");
       }
-
-      const data = await getUserData(user?.uid);
-
-      dispatch(updateUser(data));
     });
 
     return () => {

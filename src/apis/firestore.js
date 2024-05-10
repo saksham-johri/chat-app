@@ -2,6 +2,7 @@ import {
   arrayUnion,
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   serverTimestamp,
@@ -50,7 +51,7 @@ export const getUserData = async (uid) => {
 
     const querySnapShot = await getDocs(userQuery);
 
-    return querySnapShot.docs[0].data();
+    return querySnapShot?.docs[0]?.data();
   } catch (error) {
     throw new Error(error);
   }
@@ -111,6 +112,74 @@ export const addNewChat = async ({ currentUserUid, uid }) => {
         updatedAt: Date.now(),
         lastMassage: "",
       }),
+    });
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+export const sendMessage = async ({
+  chatId,
+  text,
+  currentUserUid,
+  otherUserUid,
+}) => {
+  if (!chatId || !text || !currentUserUid || !otherUserUid) {
+    throw new Error("Invalid data");
+  }
+
+  try {
+    const chatRef = doc(firestore, "chats", chatId);
+
+    await updateDoc(chatRef, {
+      messages: arrayUnion({
+        text,
+        senderId: currentUserUid,
+        createdAt: Date.now(),
+      }),
+    });
+
+    [currentUserUid, otherUserUid]?.forEach(async (uid) => {
+      const userChatRef = doc(firestore, "user-chats", uid);
+      const userChatsSnapshot = await getDoc(userChatRef);
+
+      if (!userChatsSnapshot.exists()) return;
+
+      const userChatsData = userChatsSnapshot.data();
+      const chatIndex = userChatsData?.chats?.findIndex(
+        (chat) => chat.chatId === chatId
+      );
+
+      userChatsData.chats[chatIndex].lastMassage = text;
+      userChatsData.chats[chatIndex].isSeen =
+        uid === currentUserUid ? true : false;
+      userChatsData.chats[chatIndex].updatedAt = Date.now();
+
+      await updateDoc(userChatRef, {
+        chats: userChatsData.chats,
+      });
+    });
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+export const chatSeen = async ({ chatId, currentUserUid }) => {
+  try {
+    const userChatRef = doc(firestore, "user-chats", currentUserUid);
+    const userChatsSnapshot = await getDoc(userChatRef);
+
+    if (!userChatsSnapshot.exists()) return;
+
+    const userChatsData = userChatsSnapshot.data();
+    const chatIndex = userChatsData?.chats?.findIndex(
+      (chat) => chat.chatId === chatId
+    );
+
+    userChatsData.chats[chatIndex].isSeen = true;
+
+    await updateDoc(userChatRef, {
+      chats: userChatsData.chats,
     });
   } catch (error) {
     throw new Error(error);
