@@ -1,15 +1,20 @@
 import EmojiPicker from "emoji-picker-react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { sendMessage } from "src/apis/firestore";
 import { firestore } from "src/firebase";
+import { setLoader } from "src/redux";
 import "./style.scss";
 
 const Chat = () => {
+  const dispatch = useDispatch();
+
   const selectedChat = useSelector((state) => state?.selectedChat);
   const { uid: currentUserUid } = useSelector((state) => state?.currentUser);
+
+  const imageRef = useRef(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -64,6 +69,35 @@ const Chat = () => {
       });
   };
 
+  const uploadImage = ({ target: { files = [] } = {} }) => {
+    const image = files[0];
+
+    if (!image) return;
+
+    const formData = new FormData();
+    formData.append("image", image);
+
+    const data = Object.fromEntries(formData.entries());
+
+    dispatch(setLoader(true));
+    sendMessage({
+      chatId: selectedChat?.chatId,
+      text: null,
+      currentUserUid: currentUserUid,
+      otherUserUid: selectedChat?.user?.uid,
+      image: data?.image,
+    })
+      .then(() => {
+        imageRef.current.value = null;
+      })
+      .catch((error) => {
+        toast.error(error.message || "Failed to send message");
+      })
+      .finally(() => {
+        dispatch(setLoader(false));
+      });
+  };
+
   if (!selectedChat?.chatId) return null;
 
   return (
@@ -93,49 +127,58 @@ const Chat = () => {
       </div>
 
       <div className="message-container">
-        {data?.messages?.map(
-          ({ createdAt, text, senderId, image: imageURL }) => {
-            const ourMessage = senderId === currentUserUid;
+        {data?.messages?.map(({ createdAt, text, senderId, imageURL }) => {
+          const ourMessage = senderId === currentUserUid;
 
-            return (
-              <div
-                key={createdAt}
-                className={`messages ${ourMessage ? "own" : ""}`}
-              >
-                {ourMessage ? null : (
-                  <img
-                    className="user-img"
-                    src={
-                      selectedChat?.user?.photoURL
-                        ? selectedChat?.user?.photoURL
-                        : "./assets/avatar.png"
-                    }
-                    alt=""
-                  />
-                )}
+          return (
+            <div
+              key={createdAt}
+              className={`messages ${ourMessage ? "own" : ""}`}
+            >
+              {ourMessage ? null : (
+                <img
+                  className="user-img"
+                  src={
+                    selectedChat?.user?.photoURL
+                      ? selectedChat?.user?.photoURL
+                      : "./assets/avatar.png"
+                  }
+                  alt=""
+                />
+              )}
 
-                <div className="texts">
-                  {imageURL ? (
-                    <img className="message-img" src={imageURL} alt="" />
-                  ) : null}
+              <div className="texts">
+                {imageURL ? (
+                  <img className="message-img" src={imageURL} alt="" />
+                ) : null}
 
-                  <p className="message-text">{text}</p>
+                {text ? <p className="message-text">{text}</p> : null}
 
-                  <span className="last-seen">1 min ago</span>
-                </div>
+                <span className="last-seen">1 min ago</span>
               </div>
-            );
-          }
-        )}
+            </div>
+          );
+        })}
 
         <div ref={endRef} />
       </div>
 
       <div className="footer">
         <div className="icon-container">
-          <img src="./assets/img.png" alt="" className="icon" />
-          <img src="./assets/camera.png" alt="" className="icon" />
-          <img src="./assets/mic.png" alt="" className="icon" />
+          <label htmlFor="image">
+            <img src="./assets/img.png" alt="" className="icon" />
+          </label>
+          <input
+            ref={imageRef}
+            type="file"
+            id="image"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={uploadImage}
+          />
+
+          {/* <img src="./assets/camera.png" alt="" className="icon" /> */}
+          {/* <img src="./assets/mic.png" alt="" className="icon" /> */}
         </div>
 
         <input

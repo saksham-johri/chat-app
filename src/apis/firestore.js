@@ -11,6 +11,7 @@ import {
   where,
 } from "firebase/firestore";
 import { firestore } from "src/firebase";
+import { uploadImage } from "./storage";
 
 export const setUserInitialData = async ({
   uid,
@@ -123,20 +124,28 @@ export const sendMessage = async ({
   text,
   currentUserUid,
   otherUserUid,
+  image,
 }) => {
-  if (!chatId || !text || !currentUserUid || !otherUserUid) {
+  if (!chatId || !currentUserUid || !otherUserUid) {
     throw new Error("Invalid data");
   }
 
   try {
     const chatRef = doc(firestore, "chats", chatId);
 
+    const messageContent = {
+      text,
+      senderId: currentUserUid,
+      createdAt: Date.now(),
+    };
+
+    if (image) {
+      const imageURL = await uploadImage({ chatId, image });
+      messageContent.imageURL = imageURL;
+    }
+
     await updateDoc(chatRef, {
-      messages: arrayUnion({
-        text,
-        senderId: currentUserUid,
-        createdAt: Date.now(),
-      }),
+      messages: arrayUnion(messageContent),
     });
 
     [currentUserUid, otherUserUid]?.forEach(async (uid) => {
@@ -150,7 +159,7 @@ export const sendMessage = async ({
         (chat) => chat.chatId === chatId
       );
 
-      userChatsData.chats[chatIndex].lastMassage = text;
+      userChatsData.chats[chatIndex].lastMassage = image ? "📷 Image" : text;
       userChatsData.chats[chatIndex].isSeen =
         uid === currentUserUid ? true : false;
       userChatsData.chats[chatIndex].updatedAt = Date.now();
