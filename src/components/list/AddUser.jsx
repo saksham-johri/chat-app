@@ -16,11 +16,16 @@ const AddUser = ({ toggleAddMore = () => {} }) => {
     event.preventDefault();
 
     const formData = new FormData(event.target);
-    const name = formData.get("name");
+    const text = formData.get("text");
+
+    if (!text) {
+      setUsers([]);
+      return toast.error("Please enter a name/email");
+    }
 
     dispatch(setLoader(true));
     try {
-      const userList = await findUsers(name);
+      const userList = await findUsers(text);
       const filteredList = userList?.filter(
         ({ uid }) => uid !== currentUser?.uid
       );
@@ -58,7 +63,7 @@ const AddUser = ({ toggleAddMore = () => {} }) => {
       <form className="form" onSubmit={onSubmit}>
         <input
           type="text"
-          name="name"
+          name="text"
           placeholder="Type Here..."
           className="input"
         />
@@ -70,7 +75,7 @@ const AddUser = ({ toggleAddMore = () => {} }) => {
 
       {users?.length ? (
         <div className="user-container">
-          {users?.map(({ uid, displayName, photoURL }) => (
+          {users?.map(({ uid, displayName, photoURL, email }) => (
             <div key={uid} className="user">
               <div className="user-detail">
                 <img
@@ -78,7 +83,11 @@ const AddUser = ({ toggleAddMore = () => {} }) => {
                   alt=""
                   className="user-image"
                 />
-                <span className="user-name">{displayName}</span>
+
+                <div className="text">
+                  <span className="user-name">{displayName}</span>
+                  <span className="user-email">{email}</span>
+                </div>
               </div>
 
               <button className="add" onClick={() => handleAddUser({ uid })}>

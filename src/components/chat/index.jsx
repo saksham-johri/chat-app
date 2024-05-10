@@ -176,9 +176,6 @@ const Chat = () => {
             style={{ display: "none" }}
             onChange={uploadImage}
           />
-
-          {/* <img src="./assets/camera.png" alt="" className="icon" /> */}
-          {/* <img src="./assets/mic.png" alt="" className="icon" /> */}
         </div>
 
         <input

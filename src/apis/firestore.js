@@ -4,6 +4,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  or,
   query,
   serverTimestamp,
   setDoc,
@@ -58,15 +59,15 @@ export const getUserData = async (uid) => {
   }
 };
 
-export const findUsers = async (name) => {
-  if (!name) {
+export const findUsers = async (text) => {
+  if (!text) {
     throw new Error("Invalid name");
   }
 
   try {
     const userQuery = query(
       collection(firestore, "users"),
-      where("displayName", "==", name)
+      or(where("displayName", "==", text), where("email", "==", text))
     );
 
     const querySnapShot = await getDocs(userQuery);
