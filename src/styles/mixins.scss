@@ -39,3 +39,11 @@ $desktop-width: 1024px;
   -webkit-backdrop-filter: blur(1.125rem) saturate(180%);
   border-radius: 0.5rem;
 }
+
+@mixin scaleUp($scale: 1.2) {
+  transition-duration: 250ms;
+
+  &:hover {
+    transform: scale($scale);
+  }
+}

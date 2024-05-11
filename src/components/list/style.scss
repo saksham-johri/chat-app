@@ -39,11 +39,7 @@
       width: 1.75rem;
       height: 1.75rem;
       cursor: pointer;
-      transition-duration: 250ms;
-
-      &:hover {
-        scale: 1.2;
-      }
+      @include scaleUp;
 
       path {
         fill: $white;
@@ -94,11 +90,7 @@
         height: 1.5rem;
         border-radius: 50%;
         cursor: pointer;
-        transition-duration: 250ms;
-
-        &:hover {
-          scale: 1.2;
-        }
+        @include scaleUp;
 
         circle,
         path {
@@ -211,12 +203,8 @@
         background-color: transparent;
         outline: none;
         border: none;
-        transition-duration: 250ms;
         cursor: pointer;
-
-        &:hover {
-          scale: 1.2;
-        }
+        @include scaleUp;
 
         .search-btn {
           height: 1.5rem;
@@ -232,11 +220,7 @@
         height: 1.75rem;
         width: 1.75rem;
         cursor: pointer;
-        transition-duration: 250ms;
-
-        &:hover {
-          scale: 1.2;
-        }
+        @include scaleUp;
 
         path {
           fill: $white;
@@ -256,17 +240,6 @@
         align-items: center;
         justify-content: space-between;
         padding: 0 0.75rem;
-
-        &.exist {
-          .add {
-            cursor: not-allowed;
-            opacity: 0.5;
-
-            &:hover {
-              scale: 1;
-            }
-          }
-        }
 
         .user-detail {
           display: flex;
@@ -301,30 +274,20 @@
           height: 1.5rem;
           width: 1.5rem;
           cursor: pointer;
-          transition-duration: 250ms;
-
-          &:hover {
-            scale: 1.2;
-          }
+          @include scaleUp;
 
           path {
             fill: $white;
           }
         }
 
-        // .add {
-        //   background-color: rgba($secondary-color, 0.5);
-        //   color: $white;
-        //   padding: 0.5rem 1rem;
-        //   border: none;
-        //   outline: none;
-        //   border-radius: 0.5rem;
-        //   cursor: pointer;
-
-        //   &:hover {
-        //     background-color: rgba($secondary-color, 0.7);
-        //   }
-        // }
+        &.exist {
+          .add {
+            cursor: not-allowed;
+            opacity: 0.5;
+            @include scaleUp(1);
+          }
+        }
       }
     }
   }
