@@ -1,8 +1,14 @@
+import Logout from "public/assets/logout.svg?react";
 import { useSelector } from "react-redux";
+import { auth } from "src/firebase";
 
 const UserInfo = () => {
   const currentUser = useSelector((state) => state.currentUser);
   const { displayName, photoURL } = currentUser || {};
+
+  const logout = () => {
+    auth.signOut();
+  };
 
   return (
     <div className="user-info">
@@ -17,11 +23,7 @@ const UserInfo = () => {
         </h2>
       </div>
 
-      <div className="icon-container">
-        <img src="./assets/more.png" alt="" className="icon" />
-        <img src="./assets/video.png" alt="" className="icon" />
-        <img src="./assets/edit.png" alt="" className="icon" />
-      </div>
+      <Logout className="logout" onClick={logout} />
     </div>
   );
 };

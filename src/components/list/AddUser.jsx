@@ -1,3 +1,6 @@
+import AddNewUserIcon from "public/assets/add-new-user.svg?react";
+import CancelIcon from "public/assets/cancel.svg?react";
+import SearchFolderIcon from "public/assets/search-folder.svg?react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -25,17 +28,17 @@ const AddUser = ({ toggleAddMore = () => {} }) => {
 
     dispatch(setLoader(true));
     try {
-      const userList = await findUsers(text);
-      const filteredList = userList?.filter(
-        ({ uid }) => uid !== currentUser?.uid
-      );
+      const userList = await findUsers({
+        text,
+        currentUserUid: currentUser?.uid,
+      });
 
-      if (!filteredList?.length) {
+      if (!userList?.length) {
         setUsers([]);
         return toast.error("No user found");
       }
 
-      setUsers(filteredList);
+      setUsers(userList);
     } catch (error) {
       toast.error(error?.message || "Something went wrong");
     } finally {
@@ -59,44 +62,54 @@ const AddUser = ({ toggleAddMore = () => {} }) => {
   };
 
   return (
-    <div className="add-user">
-      <form className="form" onSubmit={onSubmit}>
-        <input
-          type="text"
-          name="text"
-          placeholder="Type Here..."
-          className="input"
-        />
+    <div className="add-user-container">
+      <div className="add-user">
+        <form className="form" onSubmit={onSubmit}>
+          <input
+            autoFocus
+            type="text"
+            name="text"
+            placeholder="Type Here..."
+            className="input"
+          />
 
-        <button type="submit" className="button">
-          Search
-        </button>
-      </form>
+          <button type="submit" className="button">
+            <SearchFolderIcon className="search-btn" />
+          </button>
 
-      {users?.length ? (
-        <div className="user-container">
-          {users?.map(({ uid, displayName, photoURL, email }) => (
-            <div key={uid} className="user">
-              <div className="user-detail">
-                <img
-                  src={photoURL ? photoURL : "./assets/avatar.png"}
-                  alt=""
-                  className="user-image"
-                />
+          <CancelIcon className="cancel" onClick={toggleAddMore} />
+        </form>
 
-                <div className="text">
-                  <span className="user-name">{displayName}</span>
-                  <span className="user-email">{email}</span>
+        {users?.length ? (
+          <div className="user-container">
+            {users?.map(
+              ({ uid, displayName, photoURL, email, isChatExist }) => (
+                <div key={uid} className={`user ${isChatExist ? "exist" : ""}`}>
+                  <div className="user-detail">
+                    <img
+                      src={photoURL ? photoURL : "./assets/avatar.png"}
+                      alt=""
+                      className="user-image"
+                    />
+
+                    <div className="text">
+                      <span className="user-name">{displayName}</span>
+                      <span className="user-email">{email}</span>
+                    </div>
+                  </div>
+
+                  <AddNewUserIcon
+                    className="add"
+                    onClick={() =>
+                      isChatExist ? null : handleAddUser({ uid })
+                    }
+                  />
                 </div>
-              </div>
-
-              <button className="add" onClick={() => handleAddUser({ uid })}>
-                Add User
-              </button>
-            </div>
-          ))}
-        </div>
-      ) : null}
+              )
+            )}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 };

@@ -1,13 +1,8 @@
 import { useSelector } from "react-redux";
-import { auth } from "src/firebase";
 import "./style.scss";
 
 const Detail = () => {
   const selectedChat = useSelector((state) => state?.selectedChat);
-
-  const logout = () => {
-    auth.signOut();
-  };
 
   if (!selectedChat?.chatId) return null;
 
@@ -74,9 +69,6 @@ const Detail = () => {
 
       <div className="footer">
         <button className="block">Block User</button>
-        <button className="logout" onClick={logout}>
-          Logout
-        </button>
       </div>
     </div>
   );

@@ -59,7 +59,7 @@ export const getUserData = async (uid) => {
   }
 };
 
-export const findUsers = async (text) => {
+export const findUsers = async ({ text, currentUserUid }) => {
   if (!text) {
     throw new Error("Invalid name");
   }
@@ -72,11 +72,25 @@ export const findUsers = async (text) => {
 
     const querySnapShot = await getDocs(userQuery);
 
-    if (!querySnapShot.empty) {
-      return querySnapShot.docs.map((doc) => doc.data());
+    if (querySnapShot.empty) {
+      return [];
     }
 
-    return [];
+    const data = querySnapShot.docs
+      .map((doc) => doc.data())
+      ?.filter(({ uid }) => uid !== currentUserUid); // Remove current user from list
+
+    const res = (await getDoc(doc(firestore, "user-chats", currentUserUid)))
+      .data()
+      ?.chats?.map(({ receiverId }) => receiverId);
+
+    data?.forEach((item) => {
+      if (res?.includes(item.uid)) {
+        item.isChatExist = true;
+      }
+    });
+
+    return data;
   } catch (error) {
     throw new Error(error);
   }

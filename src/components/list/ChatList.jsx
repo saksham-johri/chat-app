@@ -1,10 +1,14 @@
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import AddIcon from "public/assets/add.svg?react";
+import Minus from "public/assets/minus.svg?react";
+import SearchIcon from "public/assets/search.svg?react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { chatSeen } from "src/apis/firestore";
 import { firestore } from "src/firebase";
 import { setLoader, setSelectedChat } from "src/redux";
+import { debounce } from "src/utils";
 import AddUser from "./AddUser";
 
 const RenderChatItem = ({ data = {}, onClick = () => {} }) => {
@@ -15,10 +19,14 @@ const RenderChatItem = ({ data = {}, onClick = () => {} }) => {
     user: { displayName, photoURL } = {},
   } = data || {};
 
+  const selectedChat = useSelector((state) => state?.selectedChat);
+
   return (
     <div
       key={chatId}
-      className={`item ${!isSeen ? "not-seen" : ""}`}
+      className={`item ${!isSeen ? "not-seen" : ""} ${
+        chatId === selectedChat?.chatId ? "selected" : ""
+      }`}
       onClick={() => onClick(data)}
     >
       <img
@@ -41,6 +49,8 @@ const ChatList = () => {
 
   const [isAddMore, setIsAddMore] = useState(false);
   const [chats, setChats] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [displayChats, setDisplayChats] = useState([]);
 
   useEffect(() => {
     if (!currentUser?.uid) return;
@@ -78,6 +88,11 @@ const ChatList = () => {
     };
   }, [currentUser?.uid]);
 
+  useEffect(() => {
+    setSearchText("");
+    setDisplayChats(chats);
+  }, [chats]);
+
   const toggleAddMore = () => setIsAddMore(!isAddMore);
 
   const onChatSelect = async (chatDetails) => {
@@ -95,24 +110,49 @@ const ChatList = () => {
     }
   };
 
+  const onSearch = debounce((value) => {
+    if (!value) return setDisplayChats(chats);
+
+    const filteredChats = chats?.filter(
+      ({ user: { displayName, email } = {} }) => {
+        if (displayName.toLowerCase().includes(value.toLowerCase()))
+          return true;
+
+        if (email.toLowerCase().includes(value.toLowerCase())) return true;
+
+        return false;
+      }
+    );
+
+    setDisplayChats(filteredChats);
+  }, 500);
+
   return (
     <div className="chat-list">
       <div className="search">
         <div className="search-bar">
-          <img src="./assets/search.png" alt="" className="search-icon" />
-          <input type="text" placeholder="Search" className="search-input" />
+          <SearchIcon className="search-icon" />
+          <input
+            type="search"
+            placeholder="Search"
+            className="search-input"
+            value={searchText}
+            onChange={({ target: { value = "" } = {} }) => {
+              onSearch(value);
+              setSearchText(value);
+            }}
+          />
         </div>
 
-        <img
-          src={isAddMore ? "./assets/minus.png" : "./assets/plus.png"}
-          alt=""
-          className="add-more-icon"
-          onClick={toggleAddMore}
-        />
+        {isAddMore ? (
+          <Minus className="add-more-icon" onClick={toggleAddMore} />
+        ) : (
+          <AddIcon className="add-more-icon" onClick={toggleAddMore} />
+        )}
       </div>
 
       <div className="item-container">
-        {chats?.map((chatDetails) => (
+        {displayChats?.map((chatDetails) => (
           <RenderChatItem
             key={chatDetails?.chatId}
             data={chatDetails}

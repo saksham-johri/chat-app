@@ -36,5 +36,6 @@ $desktop-width: 1024px;
 @mixin section {
   background-color: $background-color;
   backdrop-filter: blur(1.125rem) saturate(180%);
+  -webkit-backdrop-filter: blur(1.125rem) saturate(180%);
   border-radius: 0.5rem;
 }
