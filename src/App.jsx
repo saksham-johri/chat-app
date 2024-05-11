@@ -1,17 +1,18 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import "./_global.scss";
 import { getUserData } from "./apis/firestore";
-import Chat from "./components/Chat";
-import Detail from "./components/Detail";
-import List from "./components/List";
 import Loader from "./components/Loader";
-import Login from "./components/Login";
 import { auth } from "./firebase";
 import { updateUser } from "./redux";
+
+const Chat = lazy(() => import("./components/Chat"));
+const Detail = lazy(() => import("./components/Detail"));
+const List = lazy(() => import("./components/List"));
+const Login = lazy(() => import("./components/Login"));
 
 const App = () => {
   const dispatch = useDispatch();
@@ -25,9 +26,11 @@ const App = () => {
   useEffect(() => {
     // Listener to check if user is logged in or not
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log(">>> ~ user:", user);
+
       try {
         // If user is not logged in, update redux store with null
-        if (!user) {
+        if (!user?.uid) {
           dispatch(updateUser(null));
           return;
         }
@@ -53,12 +56,24 @@ const App = () => {
     <div className="mainContainer">
       {currentUser?.uid ? (
         <>
-          <List />
-          <Chat toggleChatInfo={toggleChatInfo} />
-          {showChatInfo ? <Detail /> : null}
+          <Suspense fallback={<Loader />}>
+            <List />
+          </Suspense>
+
+          <Suspense fallback={<Loader />}>
+            <Chat toggleChatInfo={toggleChatInfo} />
+          </Suspense>
+
+          {showChatInfo ? (
+            <Suspense fallback={<Loader />}>
+              <Detail />
+            </Suspense>
+          ) : null}
         </>
       ) : (
-        <Login />
+        <Suspense fallback={<Loader />}>
+          <Login />
+        </Suspense>
       )}
 
       {isLoading ? <Loader /> : null}

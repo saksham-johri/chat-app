@@ -31,6 +31,7 @@ const SignIn = ({ toggleView = () => {} }) => {
       <form className="form" onSubmit={onLogin}>
         <input
           required
+          defaultValue="email@email.com"
           type="email"
           name="email"
           placeholder="Email"
@@ -38,6 +39,7 @@ const SignIn = ({ toggleView = () => {} }) => {
         />
         <input
           required
+          defaultValue="Password@123"
           type="password"
           name="password"
           placeholder="Password"
