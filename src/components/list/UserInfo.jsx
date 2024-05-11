@@ -3,9 +3,9 @@ import { useSelector } from "react-redux";
 import { auth } from "src/firebase";
 
 const UserInfo = () => {
-  const currentUser = useSelector((state) => state.currentUser);
-  const { displayName, photoURL } = currentUser || {};
+  const { displayName, photoURL } = useSelector((state) => state.currentUser);
 
+  // Function to logout user
   const logout = () => {
     auth.signOut();
   };

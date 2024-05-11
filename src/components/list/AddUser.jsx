@@ -13,14 +13,16 @@ const AddUser = ({ toggleAddMore = () => {} }) => {
 
   const currentUser = useSelector((state) => state?.currentUser);
 
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState([]); // State to store users list
 
+  // Function to handle form submission to find users by name/email
   const onSubmit = async (event) => {
-    event.preventDefault();
+    event.preventDefault(); // Prevent default form submission
 
-    const formData = new FormData(event.target);
-    const text = formData.get("text");
+    const formData = new FormData(event.target); // Get form data
+    const text = formData.get("text"); // Get text from form data
 
+    // If text is empty, show error message and return
     if (!text) {
       setUsers([]);
       return toast.error("Please enter a name/email");
@@ -28,17 +30,19 @@ const AddUser = ({ toggleAddMore = () => {} }) => {
 
     dispatch(setLoader(true));
     try {
+      // Find users by name/email from firestore and update users state
       const userList = await findUsers({
         text,
         currentUserUid: currentUser?.uid,
       });
 
+      // If no user found, show error message and return
       if (!userList?.length) {
         setUsers([]);
         return toast.error("No user found");
       }
 
-      setUsers(userList);
+      setUsers(userList); // Update users state with user list
     } catch (error) {
       toast.error(error?.message || "Something went wrong");
     } finally {
@@ -46,12 +50,13 @@ const AddUser = ({ toggleAddMore = () => {} }) => {
     }
   };
 
+  // Function to add user to chat list and create new chat
   const handleAddUser = ({ uid }) => {
     dispatch(setLoader(true));
     addNewChat({ currentUserUid: currentUser?.uid, uid })
       .then(() => {
         toast.success("User added successfully");
-        toggleAddMore();
+        toggleAddMore(); // Toggle visibility of add user section
       })
       .catch((error) => {
         toast.error(error?.message || "Something went wrong");
