@@ -115,6 +115,7 @@ const ChatList = () => {
         chatId: chatDetails?.chatId,
         currentUserUid: currentUser?.uid,
       });
+
       dispatch(setSelectedChat(chatDetails));
     } catch (error) {
       toast.error(error?.message || "Something went wrong");

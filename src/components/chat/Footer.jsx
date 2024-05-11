@@ -13,6 +13,7 @@ const Footer = () => {
 
   const { uid: currentUserUid } = useSelector((state) => state?.currentUser);
   const selectedChat = useSelector((state) => state?.selectedChat);
+  const { isCurrentUserBlocked, isReceiverBlocked } = selectedChat || {};
 
   const imageRef = useRef(null); // Image input reference
 
@@ -86,10 +87,14 @@ const Footer = () => {
   return (
     <div className="footer">
       <label htmlFor="image">
-        <ImageIcon className="icon" />
+        <ImageIcon
+          className="icon"
+          disabled={isCurrentUserBlocked || isReceiverBlocked}
+        />
       </label>
 
       <input
+        disabled={isCurrentUserBlocked || isReceiverBlocked}
         ref={imageRef}
         type="file"
         id="image"
@@ -100,6 +105,7 @@ const Footer = () => {
 
       <input
         autoFocus
+        disabled={isCurrentUserBlocked || isReceiverBlocked}
         type="text"
         placeholder="Type a message..."
         className="input"
@@ -113,14 +119,22 @@ const Footer = () => {
       />
 
       <div className="emoji">
-        <EmojiIcon className="icon" onClick={toggleEmoji} />
+        <EmojiIcon
+          className="icon"
+          disabled={isCurrentUserBlocked || isReceiverBlocked}
+          onClick={toggleEmoji}
+        />
 
         <div className="emoji-picker">
           <EmojiPicker theme="dark" open={isOpen} onEmojiClick={onEmojiClick} />
         </div>
       </div>
 
-      <SendIcon className="icon send" onClick={onSend} />
+      <SendIcon
+        className="icon send"
+        disabled={isCurrentUserBlocked || isReceiverBlocked}
+        onClick={onSend}
+      />
     </div>
   );
 };

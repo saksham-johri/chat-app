@@ -1,4 +1,5 @@
 import {
+  arrayRemove,
   arrayUnion,
   collection,
   doc,
@@ -204,6 +205,24 @@ export const chatSeen = async ({ chatId, currentUserUid }) => {
 
     await updateDoc(userChatRef, {
       chats: userChatsData.chats,
+    });
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+export const blockUser = async ({
+  currentUserUid,
+  otherUserUid,
+  isReceiverBlocked,
+}) => {
+  try {
+    const userRef = doc(firestore, "users", currentUserUid);
+
+    await updateDoc(userRef, {
+      blocked: isReceiverBlocked
+        ? arrayRemove(otherUserUid)
+        : arrayUnion(otherUserUid),
     });
   } catch (error) {
     throw new Error(error);

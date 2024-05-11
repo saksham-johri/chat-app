@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import Footer from "./Footer";
 import SharedPhotos from "./SharedPhotos";
 import User from "./User";
 import "./style.scss";
@@ -14,9 +15,7 @@ const Detail = () => {
 
       <SharedPhotos />
 
-      <div className="footer">
-        <button className="block">Block User</button>
-      </div>
+      <Footer />
     </div>
   );
 };

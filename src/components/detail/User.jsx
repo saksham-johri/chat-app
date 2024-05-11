@@ -1,9 +1,12 @@
 import { useSelector } from "react-redux";
 
 const User = () => {
-  const { user: { photoURL, displayName, email } = {} } = useSelector(
-    (state) => state?.selectedChat
-  );
+  const { user = {} } = useSelector((state) => state.selectedChat);
+  const {
+    photoURL = null,
+    displayName = "User Not Found",
+    email = "Invalid Id",
+  } = user || {};
 
   return (
     <div className="user">
