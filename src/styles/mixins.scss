@@ -1,0 +1,49 @@
+$tablet-width: 768px;
+$desktop-width: 1024px;
+
+@mixin mobile {
+  @media (max-width: #{$tablet-width - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{$tablet-width}) and (max-width: #{$desktop-width - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{$desktop-width}) {
+    @content;
+  }
+}
+
+@mixin ellipse {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin input {
+  background-color: $input-background-color;
+  color: $white;
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+@mixin section {
+  background-color: $background-color;
+  backdrop-filter: blur(1.125rem) saturate(180%);
+  -webkit-backdrop-filter: blur(1.125rem) saturate(180%);
+  border-radius: 0.5rem;
+}
+
+@mixin scaleUp($scale: 1.2) {
+  transition-duration: 250ms;
+
+  &:hover {
+    transform: scale($scale);
+  }
+}

@@ -1,35 +1,83 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+/* eslint-disable react-hooks/exhaustive-deps */
+import { onAuthStateChanged } from "firebase/auth";
+import { Suspense, lazy, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import "./_global.scss";
+import { getUserData } from "./apis/firestore";
+import Loader from "./components/Loader";
+import { auth } from "./firebase";
+import { updateUser } from "./redux";
 
-function App() {
-  const [count, setCount] = useState(0)
+const Chat = lazy(() => import("./components/Chat"));
+const Detail = lazy(() => import("./components/Detail"));
+const List = lazy(() => import("./components/List"));
+const Login = lazy(() => import("./components/Login"));
+
+const App = () => {
+  const dispatch = useDispatch();
+
+  const isLoading = useSelector((state) => state?.isLoading);
+  const currentUser = useSelector((state) => state?.currentUser);
+
+  const [showChatInfo, setShowChatInfo] = useState(false); // State to toggle visibility of chat info section
+
+  // Check if user is logged in and fetch user data from firestore if logged in and update redux store with user data
+  useEffect(() => {
+    // Listener to check if user is logged in or not
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log(">>> ~ user:", user);
+
+      try {
+        // If user is not logged in, update redux store with null
+        if (!user?.uid) {
+          dispatch(updateUser(null));
+          return;
+        }
+
+        const data = await getUserData(user?.uid); // Fetch user data from firestore
+
+        dispatch(updateUser(data));
+      } catch (error) {
+        toast.error(error?.message || "Something went wrong");
+      }
+    });
+
+    // Unsubscribe from onAuthStateChanged listener
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Function to toggle visibility of chat info section
+  const toggleChatInfo = () => setShowChatInfo(!showChatInfo);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="mainContainer">
+      {currentUser?.uid ? (
+        <>
+          <Suspense fallback={<Loader />}>
+            <List />
+          </Suspense>
 
-export default App
+          <Suspense fallback={<Loader />}>
+            <Chat toggleChatInfo={toggleChatInfo} />
+          </Suspense>
+
+          {showChatInfo ? (
+            <Suspense fallback={<Loader />}>
+              <Detail />
+            </Suspense>
+          ) : null}
+        </>
+      ) : (
+        <Suspense fallback={<Loader />}>
+          <Login />
+        </Suspense>
+      )}
+
+      {isLoading ? <Loader /> : null}
+    </div>
+  );
+};
+export default App;
